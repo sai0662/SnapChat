@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import React, {useState, useRef} from 'react';
 import {
   Animated,
@@ -13,47 +14,58 @@ import {AnimatedCircularProgress} from 'react-native-circular-progress';
 
 function App() {
   const [progressValue, setProgressValue] = useState(0);
+  const [buttonCollapse, setButtonCollapse] = useState(true);
+  const [isClicked, setIsClicked] = useState(true);
 
   const timer = useRef(null);
   const increment = () => {
     if (progressValue !== 100) {
+      console.log('started recording');
       timer.current = setInterval(() => setProgressValue(prev => prev + 1), 60);
     }
     if (progressValue === 100) {
       timer.current = 0;
       setProgressValue(0);
+      console.log('completed');
     }
   };
 
   function timeoutClear() {
     clearInterval(timer.current);
+    if (buttonCollapse) {
+      setButtonCollapse(false);
+      console.log('completed');
+    }
   }
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  const fadeOut = () => {
-    // Will change fadeAnim value to 0 in 3 seconds
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 3,
-    }).start();
+  const imageClicked = () => {
+    if (isClicked) {
+      console.log('clicked image');
+      setIsClicked(false);
+    }
   };
+
+  console.log(progressValue);
   return (
     <View style={styles.container}>
-      <TouchableWithoutFeedback onPressIn={increment} onPressOut={timeoutClear}>
+      <TouchableWithoutFeedback
+        onLongPress={increment}
+        onPress={imageClicked}
+        onPressOut={timeoutClear}>
         <View style={styles.containertwo}>
-          <AnimatedCircularProgress
-            size={100}
-            width={8}
-            backgroundWidth={5}
-            rotation={0}
-            fill={progressValue}
-            tintColor="#00ff00"
-            backgroundColor="white"
-            lineCap="round"
-            onPress={() => console.log('Plz work')}>
-            {fill => <Text>Hold</Text>}
-          </AnimatedCircularProgress>
+          {buttonCollapse && (
+            <AnimatedCircularProgress
+              size={100}
+              width={8}
+              backgroundWidth={5}
+              rotation={0}
+              fill={progressValue}
+              tintColor="#00ff00"
+              backgroundColor="white"
+              lineCap="round">
+              {fill => <Text>Hold</Text>}
+            </AnimatedCircularProgress>
+          )}
         </View>
       </TouchableWithoutFeedback>
     </View>
